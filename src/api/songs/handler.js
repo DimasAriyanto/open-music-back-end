@@ -78,15 +78,38 @@ class SongsHandler {
     };
   }
 
-  async getSongsByAlbumHandler(request) {
-    const { id } = request.params;
-    const album = await this._service.getSongsByAlbum(id);
-    console.log(album);
+  async getSongsByTitleHandler(request) {
+    const { title = '' } = request.query;
+    const songs = await this._service.getSongsByTitle(title);
 
     return {
       status: 'success',
       data: {
-        album,
+        songs,
+      },
+    };
+  }
+
+  async getSongsByPerformerHandler(request) {
+    const { performer = '' } = request.query;
+    const songs = await this._service.getSongsByPerformer(performer);
+
+    return {
+      status: 'success',
+      data: {
+        songs,
+      },
+    };
+  }
+
+  async getSongsByTitleAndPerformerHandler(request) {
+    const { title = '', performer = '' } = request.query;
+    const songs = await this._service.getSongsByTitleAndPerformer(title, performer);
+
+    return {
+      status: 'success',
+      data: {
+        songs,
       },
     };
   }

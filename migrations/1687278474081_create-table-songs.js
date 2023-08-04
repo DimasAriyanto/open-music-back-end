@@ -7,7 +7,7 @@ exports.up = (pgm) => {
     id: {
       type: 'VARCHAR(50)',
       primaryKey: true,
-      notNUll: true,
+      notNull: true,
     },
     title: {
       type: 'VARCHAR(255)',
@@ -29,21 +29,15 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNUll: true,
     },
-    albumId: {
+    album_id: {
       type: 'VARCHAR(50)',
       notNUll: true,
     },
   });
 
-  pgm.addConstraint('songs', 'fk_songs_albums', {
-    foreignKeys: {
-      columns: 'albumId',
-      references: 'albums(id)',
-    },
-  });
+  pgm.addConstraint('songs', 'fk_songs.album_id_albums.id', 'FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('songs', 'fk_songs_albums');
   pgm.dropTable('songs');
 };

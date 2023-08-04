@@ -1,7 +1,7 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
-const InvariantError = require('../../exception/InvariantError');
-const NotFoundError = require('../../exception/NotFoundError');
+const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class SongsService {
   constructor() {
@@ -11,7 +11,7 @@ class SongsService {
   async addSong({
     title, year, performer, genre, duration, albumId,
   }) {
-    const id = nanoid(16);
+    const id = `song-${nanoid(16)}`;
 
     const query = {
       text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
@@ -75,15 +75,45 @@ class SongsService {
     }
   }
 
-  async getSongsByAlbum(id) {
+  async getSongsByTitle(title) {
     const query = {
-      text: 'SELECT id, title, performer FROM songs WHERE albumId = $1',
+      text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1',
+      values: [`%${title}%`],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
+
+  async getSongsByPerformer(performer) {
+    const query = {
+      text: 'SELECT id, title, performer FROM songs WHERE LOWER(performer) LIKE $1',
+      values: [`%${performer}%`],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
+
+  async getSongsByTitleAndPerformer(title, performer) {
+    const query = {
+      text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1 AND LOWER(performer) LIKE $2',
+      values: [`%${title}%`, `%${performer}%`],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
+
+  async verifySong(id) {
+    const query = {
+      text: 'SELECT id FROM songs WHERE id = $1',
       values: [id],
     };
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
-      throw new NotFoundError('Albums tidak ditemukan');
+      throw new NotFoundError('Song tidak ditemukan');
     }
 
     return result.rows[0];

@@ -7,7 +7,7 @@ const routes = (handler) => [
   {
     method: 'GET',
     path: '/songs',
-    handler: handler.getSongsHandler,
+    handler: (request, h) => handler.getSongsHandler(request, h) && handler.getSongsByTitleHandler(request, h) && handler.getSongsByPerformerHandler(request, h) && handler.getSongsByTitleAndPerformerHandler(request, h),
   },
   {
     method: 'GET',
@@ -23,11 +23,6 @@ const routes = (handler) => [
     method: 'DELETE',
     path: '/songs/{id}',
     handler: handler.deleteSongByIdHandler,
-  },
-  {
-    method: 'GET',
-    path: '/album/{id}',
-    handler: handler.getSongsByAlbumHandler,
   },
 ];
 

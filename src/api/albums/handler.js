@@ -69,6 +69,19 @@ class AlbumsHandler {
       message: 'Album berhasil dihapus',
     };
   }
+
+  async getSongsInAlbumtHandler(request) {
+    const { playlistId } = request.params;
+
+    const playlist = await this._playlistsService.getSongsInAlbums(playlistId);
+
+    return {
+      status: 'success',
+      data: {
+        playlist,
+      },
+    };
+  }
 }
 
 module.exports = AlbumsHandler;
