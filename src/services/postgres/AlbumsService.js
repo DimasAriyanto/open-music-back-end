@@ -114,69 +114,6 @@ class AlbumsService {
     await this._pool.query(query);
   }
 
-  // async addLike({ userId, albumId }) {
-  //   const queryCheck = {
-  //     text: 'SELECT id FROM user_album_likes WHERE user_id = $1 AND album_id = $2',
-  //     values: [userId, albumId],
-  //   };
-
-  //   const checkResult = await this._pool.query(queryCheck);
-
-  //   if (checkResult.rows.length > 0) {
-  //     throw new ClientError('User sudah melakukan like');
-  //   }
-
-  //   const id = `useralbumlike-${nanoid(16)}`;
-
-  //   const queryInsert = {
-  //     text: 'INSERT INTO user_album_likes(id, user_id, album_id) VALUES($1, $2, $3) RETURNING id',
-  //     values: [id, userId, albumId],
-  //   };
-
-  //   const result = await this._pool.query(queryInsert);
-
-  //   if (!result.rows[0].id) {
-  //     throw new InvariantError('Like gagal ditambahkan');
-  //   }
-
-  //   await this._cacheService.delete('likes');
-  //   return result.rows[0].id;
-  // }
-
-  // async countTotalLikes() {
-  //   try {
-  //     const result = await this._cacheService.get('likes');
-  //     return JSON.parse(result);
-  //   } catch (error) {
-  //     const query = {
-  //       text: 'SELECT COUNT(*) AS total_likes FROM user_album_likes',
-  //     };
-
-  //     const result = await this._pool.query(query);
-  //     const totalLikes = result.rows[0].total_likes;
-
-  //     await this._cacheService.set('likes', totalLikes);
-
-  //     return parseInt(totalLikes, 10);
-  //   }
-  // }
-
-  // async removeLike({ userId, albumId }) {
-  //   const query = {
-  //     text: 'DELETE FROM user_album_likes WHERE user_id = $1 AND album_id = $2 RETURNING id',
-  //     values: [userId, albumId],
-  //   };
-
-  //   const result = await this._pool.query(query);
-
-  //   if (!result.rows.length) {
-  //     throw new NotFoundError('Like gagal dihapus. Id tidak ditemukan');
-  //   }
-
-  //   await this._cacheService.delete('likes');
-  //   return result.rows[0].user_id;
-  // }
-
   async addLike({ userId, albumId }) {
     const queryCheck = {
       text: 'SELECT id FROM user_album_likes WHERE user_id = $1 AND album_id = $2',
@@ -202,7 +139,6 @@ class AlbumsService {
       throw new InvariantError('Like gagal ditambahkan');
     }
 
-    // Hapus cache saat menambahkan like
     await this._cacheService.delete(`likes:${albumId}`);
 
     return result.rows[0].id;
