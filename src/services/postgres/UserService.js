@@ -90,7 +90,7 @@ class UserService {
       throw new NotFoundError('User tidak ditemukan');
     }
 
-    return result.rows[0];
+    return result.rows[0].id;
   }
 }
 

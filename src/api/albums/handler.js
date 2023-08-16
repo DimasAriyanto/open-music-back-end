@@ -1,8 +1,9 @@
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(albumsService, usersService, validator) {
+    this._albumsService = albumsService;
+    this._usersService = usersService;
     this._validator = validator;
 
     autoBind(this);
@@ -12,7 +13,7 @@ class AlbumsHandler {
     this._validator.validateAlbumPayload(request.payload);
     const { name = 'untitled', year } = request.payload;
 
-    const albumId = await this._service.addAlbum({ name, year });
+    const albumId = await this._albumsService.addAlbum({ name, year });
 
     const response = h.response({
       status: 'success',
@@ -26,7 +27,7 @@ class AlbumsHandler {
   }
 
   async getAlbumsHandler() {
-    const albums = await this._service.getAlbums();
+    const albums = await this._albumsService.getAlbums();
     return {
       status: 'success',
       data: {
@@ -37,7 +38,7 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
-    const album = await this._service.getAlbumById(id);
+    const album = await this._albumsService.getAlbumById(id);
 
     return {
       status: 'success',
@@ -52,7 +53,7 @@ class AlbumsHandler {
     const { id } = request.params;
     const { name, year } = request.payload;
 
-    await this._service.editAlbumById(id, { name, year });
+    await this._albumsService.editAlbumById(id, { name, year });
 
     return {
       status: 'success',
@@ -62,7 +63,7 @@ class AlbumsHandler {
 
   async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
-    await this._service.deleteAlbumById(id);
+    await this._albumsService.deleteAlbumById(id);
 
     return {
       status: 'success',
@@ -70,16 +71,51 @@ class AlbumsHandler {
     };
   }
 
-  async getSongsInAlbumtHandler(request) {
-    const { playlistId } = request.params;
+  async postLikeAlbumHandler(request, h) {
+    const { albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+    const userId = await this._usersService.verifyUser(credentialId);
+    await this._albumsService.verifyAlbum(albumId);
 
-    const playlist = await this._playlistsService.getSongsInAlbums(playlistId);
+    await this._albumsService.addLike({ userId, albumId });
+
+    const response = h.response({
+      status: 'success',
+      message: 'Like berhasil ditambahkan',
+    });
+    response.code(201);
+    return response;
+  }
+
+  async getLikeAlbumHandler(request, h) {
+    const { albumId } = request.params;
+    await this._albumsService.verifyAlbum(albumId);
+
+    const totalLikes = await this._albumsService.countTotalLikes(albumId);
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        likes: totalLikes,
+      },
+    });
+
+    response.header('X-Data-Source', 'cache');
+
+    return response;
+  }
+
+  async deleteLikeAlbumHandler(request) {
+    const { albumId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+    const userId = await this._usersService.verifyUser(credentialId);
+    await this._albumsService.verifyAlbum(albumId);
+
+    await this._albumsService.removeLike({ userId, albumId });
 
     return {
       status: 'success',
-      data: {
-        playlist,
-      },
+      message: 'Like berhasil dihapus',
     };
   }
 }
