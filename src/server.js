@@ -104,6 +104,7 @@ const init = async () => {
       options: {
         albumsService,
         usersService,
+        cacheService,
         validator: AlbumValidator,
       },
     },

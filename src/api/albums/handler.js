@@ -1,9 +1,10 @@
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
-  constructor(albumsService, usersService, validator) {
+  constructor(albumsService, usersService, cacheService, validator) {
     this._albumsService = albumsService;
     this._usersService = usersService;
+    this._cacheService = cacheService;
     this._validator = validator;
 
     autoBind(this);
@@ -72,9 +73,10 @@ class AlbumsHandler {
   }
 
   async postLikeAlbumHandler(request, h) {
-    const { albumId } = request.params;
     const { id: credentialId } = request.auth.credentials;
     const userId = await this._usersService.verifyUser(credentialId);
+
+    const { albumId } = request.params;
     await this._albumsService.verifyAlbum(albumId);
 
     await this._albumsService.addLike({ userId, albumId });
@@ -91,18 +93,31 @@ class AlbumsHandler {
     const { albumId } = request.params;
     await this._albumsService.verifyAlbum(albumId);
 
-    const totalLikes = await this._albumsService.countTotalLikes(albumId);
+    try {
+      const result = await this._cacheService.get(`likes:${albumId}`);
+      const totalLikes = JSON.parse(result);
 
-    const response = h.response({
-      status: 'success',
-      data: {
-        likes: totalLikes,
-      },
-    });
+      const response = h.response({
+        status: 'success',
+        data: {
+          likes: totalLikes,
+        },
+      });
 
-    response.header('X-Data-Source', 'cache');
+      response.header('X-Data-Source', 'cache');
 
-    return response;
+      return response;
+    } catch (error) {
+      const totalLikes = await this._albumsService.countTotalLikes(albumId);
+
+      const response = h.response({
+        status: 'success',
+        data: {
+          likes: totalLikes,
+        },
+      });
+      return response;
+    }
   }
 
   async deleteLikeAlbumHandler(request) {

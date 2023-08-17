@@ -145,22 +145,17 @@ class AlbumsService {
   }
 
   async countTotalLikes(albumId) {
-    try {
-      const result = await this._cacheService.get(`likes:${albumId}`);
-      return JSON.parse(result);
-    } catch (error) {
-      const query = {
-        text: 'SELECT COUNT(*) AS total_likes FROM user_album_likes WHERE album_id = $1',
-        values: [albumId],
-      };
+    const query = {
+      text: 'SELECT COUNT(*) AS total_likes FROM user_album_likes WHERE album_id = $1',
+      values: [albumId],
+    };
 
-      const result = await this._pool.query(query);
-      const totalLikes = result.rows[0].total_likes;
+    const result = await this._pool.query(query);
+    const totalLikes = result.rows[0].total_likes;
 
-      await this._cacheService.set(`likes:${albumId}`, totalLikes);
+    await this._cacheService.set(`likes:${albumId}`, totalLikes);
 
-      return parseInt(totalLikes, 10);
-    }
+    return parseInt(totalLikes, 10);
   }
 
   async removeLike({ userId, albumId }) {
