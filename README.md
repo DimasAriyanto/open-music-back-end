@@ -1,6 +1,6 @@
 # Open Music API
 
-Proyek ini adalah implementasi RESTful API untuk mengelola data musik. API ini dirancang sebagai bagian dari tugas akhir pada kelas **Belajar Fundamental Aplikasi Back-End** di Dicoding.
+Proyek ini adalah implementasi RESTful API untuk mengelola data musik.
 
 ## Fitur Utama
 - **Manajemen Lagu dan Album**
